@@ -1,0 +1,19 @@
+# Секреты
+.env
+
+# База данных
+bot.db
+bot.db-journal
+
+# Логи
+*.log
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# IDE
+.idea/
+.vscode/
