@@ -1,10 +1,26 @@
+"""
+Конфигурация проекта ai-content-studio.
+
+Читает переменные окружения из:
+  1. os.environ (приоритет — Render, Docker, CI)
+  2. .env файл (локально — если существует)
+
+На Render .env отсутствует — переменные приходят из Environment Variables.
+"""
+
 import os
 from pathlib import Path
+
 from dotenv import load_dotenv
 
-# Ищем .env рядом с config.py — работает независимо от того, откуда запущен скрипт
+# Ищем .env рядом с config.py
 env_path = Path(__file__).parent / ".env"
-load_dotenv(dotenv_path=env_path, override=True)
+
+# Загружаем .env ТОЛЬКО если файл существует (локально).
+# override=False — НЕ затираем уже заданные переменные os.environ
+# (на Render BOT_TOKEN приходит из Environment, .env его не должен перекрывать).
+if env_path.exists():
+    load_dotenv(dotenv_path=env_path, override=False)
 
 
 def _required(key: str) -> str:
@@ -13,8 +29,13 @@ def _required(key: str) -> str:
     if not value or value.startswith("123456:"):
         raise SystemExit(
             f"❌ Не задана переменная окружения: {key}\n"
-            f"Проверь файл: {env_path}\n"
-            f"Формат: {key}=значение (без кавычек и пробелов)"
+            f"\n"
+            f"  Локально: добавь в файл {env_path}\n"
+            f"           Формат: {key}=значение (без кавычек и пробелов)\n"
+            f"\n"
+            f"  На Render: Dashboard → Environment → Add Environment Variable\n"
+            f"            Key:   {key}\n"
+            f"            Value: <значение>"
         )
     return value.strip()
 
